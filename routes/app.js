@@ -77,11 +77,19 @@ router.get('/sites/list/', (req, res, next) => {
     let agent_id = req.query['agent'];
     console.log(req.session.user);
     if (agent_id == req.session.user) {
-        let queryString = ''
-        res.sendStatus(200);
+        let queryString = 'SELECT text,title,category,due_date FROM todos INNER JOIN agents ON todos.agent_id = agents.agent_id WHERE todos.agent_id = ? order by due_date;';
+        mysql.query(queryString, agent_id, (err, result) => {
+            todos = []
+            result.forEach(element => {
+                todos.push(element);
+            });
+            res.status(200).json({ list: todos });
+        });
     } else {
         res.status(401).json({ msg: 'Unauthorized' });
     } 
 });
+
+
 
 module.exports = router;
