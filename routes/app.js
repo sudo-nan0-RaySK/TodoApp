@@ -3,19 +3,6 @@ var router = express.Router();
 let mysql = require('../db/db');
 let bcrypt = require('bcrypt');
 let middlwares = require('../middlewares/middlewares');
-/* GET home page. */
-router.get('/', function (req, res, next) {
-    let queryString = `SELECT * FROM user;`;
-    mysql.query(queryString, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(result);
-        }
-    });
-    res.render('index', { title: 'Express' });
-});
-
 
 /* POST Create an account */
 
@@ -88,6 +75,25 @@ router.get('/sites/list/', (req, res, next) => {
     } else {
         res.status(401).json({ msg: 'Unauthorized' });
     } 
+});
+
+router.post('/sites/', (req, res, next) => {
+    let { title, description, category, due_date } = req.body;
+    let agent_id = req.query['agent'];
+    console.log(req.session.user);
+    if (agent_id === req.session.user) {
+        let queryString = 'INSERT INTO todos(text,title,category,due_date,agent_id) VALUES(?,?,?,?,?);';
+        mysql.query(queryString, [description, title, category, due_date, agent_id], (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ err: 'Server error!' });
+            } else {
+                res.status(200).json({ status: "success" });
+           }
+        });
+    } else {
+        res.status(401).json({ msg: 'Unauthorized' });
+    }
 });
 
 
